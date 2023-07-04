@@ -38,6 +38,10 @@
 /* Maximum length of text representation of bind parameters */
 #define MAX_PARAM_LENGTH 256UL
 
+char address[5][256] = {"127.0.0.1","127.0.0.1","127.0.0.1","127.0.0.1","127.0.0.1"};
+char ports[5][256] = {"30002","30003","30004","30005","30006"};
+int  node_cnt = 5;
+
 /* PostgreSQL driver arguments */
 
 static sb_arg_t pgsql_drv_args[] =
@@ -246,13 +250,14 @@ int pgsql_drv_connect(db_conn_t *sb_conn)
 {
   PGconn *con;
 
-  con = PQsetdbLogin(args.host,
-                     args.port,
-                     NULL,
-                     NULL,
-                     args.db,
-                     args.user,
-                     args.password);
+  con = PQsetdbLogin(address[client_i],
+                       ports[client_i],
+                       NULL,
+                       NULL,
+                       args.db,
+                       args.user,
+                       args.password);
+  client_i = (client_i + 1) % node_cnt;
   if (PQstatus(con) != CONNECTION_OK)
   {
     log_text(LOG_FATAL, "Connection to database failed: %s",
